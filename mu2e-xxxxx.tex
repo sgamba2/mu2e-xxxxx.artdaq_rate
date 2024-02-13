@@ -1,0 +1,110 @@
+\documentclass{article}
+\usepackage{graphicx,geometry} % Required for inserting images
+\geometry{a4paper, top=1.5cm, bottom=1.5cm, left=2cm, right=2cm}
+
+\title{Artdaq DEMO simulation}
+\author{Sara Gamba}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{08/02/24}
+We are running an artdaq DEMO simulation: we have 2 board-readers that fill 2 event-builders that have in common one data-logger. There is also a dispatcher which aggregates DQM metrics and presents them to a visualizer application.
+In this simulation we are trying to fill the buffer of boardreaders with some numbers, changing frequency between events and then readout.
+(XXXX).Eighteen cables (108 links) are used for the Tracker, with four Tracker Readout Controllers sharing each pair of redundant links. The data rate will average 160 MBytes/s per link with two Tracker or three Calorimeter Readout Controllers. We have 40 DAQ nodes, each one with 2 DTCs. Each DTC will have one board-reader, so we expect the minimum input rate in each boardreader is 2kHz more or less. If boardreaders are not able to read this, there could be a bottleneck and the experiment can't do what is expected.
+\subsection{Variables/Functions needed for the analysis and changes we have done}
+\begin{itemize}
+    \item  $max\_fragment\_size\_bytes$: it is the maximal dimension per fragment in the shared memory that is allocated (important that the event size is less than this value);
+    \item $AllocateReadoutBuffer(char** buffer)$: it is a function that allocates memory for the buffer (each channel of the tracker will have this buffer). Its value is $uint8\_t(sizeof(demo::ToyFragment::Header) + maxADCchannels\_ \times sizeof(data\_t)))$, where $maxADCchannels\_$ is set at 50M and the $size(data\_t)$ is 2Bytes. Approximately is 100MBytes allocated;
+    \item $nADCchannels\_$: it is used where the read bytes are defined, so $bytes\_read = sizeof(demo::ToyFragment::Header) + nADCchannels\_after\_N\_seconds\_ \times sizeof(data\_t)$, so the dimension will be this number $\times$ 2Bytes;
+    \item In the function $FillBuffer(buffer,bytes\_read)$ we start filling the first channel after the header in the buffer, with some numbers;
+    \item This function is called each $throttle\_ usecs \ \mu$s. Outputs $New FragmentPtrs$ will be added to this container and the function will return True if data-taking should continue.
+\end{itemize}
+If the artdaq framework works we should see a $GetNext$ Frequency equal to the inverse of the $throttle\_ usecs \ \mu$s value.
+
+Next events are with 2 BR.
+\\
+BAD OMEN EVERYWHERE.
+\section{12/02/24}
+\begin{center}  
+\begin{table}[!h]
+\centering
+\begin{tabular}{c c c}
+\hline
+bytes & throttle &  result\\
+\hline
+200k & 0 & BAD OMEN \& back pressure \\
+200k & 10 (100kHz) & BAD OMEN \& back pressure \\
+200k & 100 (10kHz) & BAD OMEN \& back pressure\\
+200k & 1000 (1kHz) & BAD OMEN \& back pressure \\
+200k & 10000 (100Hz) & BAD OMEN \& back pressure \\
+200k & 100000 (10Hz) & BAD OMEN \& back pressure\\
+\end{tabular}
+\caption{ results.}
+\end{table}\label{tab:upperlimits}
+\end{center}
+\begin{center}  
+\begin{table}[!h]
+\centering
+\begin{tabular}{c c c}
+\hline
+bytes & throttle &  result\\
+\hline
+100k & 1000 (1kHz) & BAD OMEN \\
+100k & 2000 (500Hz) & BAD OMEN \\
+100k & 4000 (250Hz) & BAD OMEN \\
+100k & 5000 (200Hz) & BAD OMEN \\
+100k & 6000 (166Hz) & OKAY:rate 163Hz \\
+100k & 10000 (100Hz) & OKAY:rate 98.5Hz \\
+\end{tabular}
+\caption{ results. At 20MB/s more or less it gets errors.}
+\end{table}\label{tab:upperlimits}
+\end{center}
+\begin{center}  
+\begin{table}[!h]
+\centering
+\begin{tabular}{c c c}
+\hline
+bytes & throttle &  result\\
+\hline
+40k & 2000 (500Hz) & BAD OMEN  \\
+40k & 3000 (333Hz) & OKAY:rate 320Hz  \\
+40k & 5000 (200Hz) & OKAY:rate 195Hz  \\
+40k & 10000 (100Hz) & OKAY:rate 98.7Hz \\
+\end{tabular}
+\caption{ results. At 20MB/s more or less it gets errors.}
+\end{table}\label{tab:upperlimits}
+\end{center}
+
+\begin{center}  
+\begin{table}[!h]
+\centering
+\begin{tabular}{c c c}
+\hline
+bytes & throttle &  result\\
+\hline
+70k & 5000 (200Hz) & OKAY:rate 195Hz  \\
+70k & 4000 (250Hz) & OKAY:rate 242Hz and BAD OMEN after one min  \\
+70k & 3000 (333Hz) & BAD OMEN  \\
+
+\end{tabular}
+\caption{ results. At 20MB/s more or less it gets errors.}
+\end{table}\label{tab:upperlimits}
+\end{center}
+
+
+Error message: 
+\begin{itemize}
+    \item Bad Omen: Data Buffer has exceeded its size limits.
+    \\
+    ($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124
+    \\
+    with this type of error the rate is not stable
+    \item Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!
+\end{itemize}
+
+The same with Shmem instead of TCPSocket.
+\end{document}
+
