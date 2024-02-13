@@ -1,39 +1,194 @@
-\documentclass{article}
-\usepackage{graphicx,geometry} % Required for inserting images
-\geometry{a4paper, top=1.5cm, bottom=1.5cm, left=2cm, right=2cm}
+% -*- mode:flyspell; mode:latex -*-
+\documentclass[12pt]{article}
 
-\title{Artdaq DEMO simulation}
-\author{Sara Gamba}
-\date{\today}
+% \addtolength{\oddsidemargin} {-0.885in}
+% \addtolength{\textwidth}{1.75in}
+% \addtolength{\evensidemargin}{-0.8in}
+% topmargin -0.5in
+\usepackage[a4paper, top=1cm, left=1.5cm, right=1.5cm]{geometry} % width= , 
 
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\usepackage{tikz}
+\usepackage{[caption}
+\usetikzlibrary{arrows}
+\usetikzlibrary{decorations.markings}
+%\usepackage{lineno}
+
+\usetikzlibrary{decorations.pathmorphing}
+% \usepackage[absolute,overlay]{textpos}
+% \usepackage{onimage}
+
+\usepackage{times}
+\usepackage{graphics}
+
+% \usepackage{subfigure}
+% \usepackage{scalefnt}
+%
+% \renewcommand\thesubfigure{\arabic{subfigure}}
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{hhline}
+\usepackage{subfig}
+\usepackage{color}
+\usepackage[all]{hypcap}
+
+\usepackage[normalem]{ulem}  % for striking out
+% \usepackage{fancyhdr}
+% \pagestyle{fancy}
+% \fancyhead[C]{}
+% \fancyhead[L] {\it{Mu2e-doc-29670-v1.0} }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% use natbib - biblatex not available on Mu2e interactive nodes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[square,sort,comma,numbers]{natbib}
+
+% location of the .bib files: env var BIBINPUTS (~/library/bibliography)
+
+% \usepackage[backend=biber, style=numeric-comp, sorting=ynt] {biblatex}
+% \addbibresource{clfv.bib}
+
+% \addbibresource{stntuple.bib}
+% \addbibresource{mu2e_web.bib}
+% \addbibresource{radiative_pion_capture.bib}
+
+\graphicspath{{figures/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% for portability, make sure all commands are included locally
+% order them alphabetically
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \include{commands}
+
+\newcommand {\keVc}       {\mbox{$\rm keV\!/\!c$}}
+\newcommand {\kmax}       {\mbox{$k_{\rm max}$}}
+
+\newcommand {\MeVc}       {\mbox{$\rm MeV\!/c$}}
+\newcommand {\MeVcsq}     {\mbox{$\rm MeV\!/c^2$}}
+
+\newcommand {\mumemconv}[1][A] {\mbox{$\mu^- \textrm{#1} \rightarrow e^- \textrm{#1}$}}
+% Define a relay to have 2 default arguments instead of limit of 1
+\newcommand {\mumepconv}[1][A] {%
+  \def\ArgI{{#1}}%store the first argument
+  \mumepconvRelay
+}
+\newcommand \mumepconvRelay[1][A]  {\mbox{$\mu^- \textrm{\ArgI} \rightarrow e^+ \textrm{#1}$}}
+\newcommand {\muminus}    {\mbox{$\mu^-$}}
+\newcommand {\muplus}    {\mbox{$\mu^+$}}
+\newcommand {\MuToEm}     {\mbox{$\mu^- \ra e^-$}}
+\newcommand {\MuToEp}     {\mbox{$\mu^- \ra e^+$}}
+\newcommand {\MuPToEp}    {\mbox{$\mu^+ \ra e^+$}}
+\newcommand {\ra}        {\rightarrow}
+\newcommand {\tandip}    {\mbox{$\tan \lambda$}}
+
+\newcommand {\Pb}[1]     {\mbox{$\rm ^{#1}Pb$}}                 % isotopes of lead
+\newcommand {\Au}[1]     {\mbox{$\rm ^{#1}Au$}}                 % isotopes of gold
+\newcommand {\Ir}[1]     {\mbox{$\rm ^{#1}Ir$}}                 % isotopes of iridium
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% editing commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand {\add}[1]    {{\red #1}}
+\newcommand {\alt}[1]    {{\green #1}} %alternate comment color
+\newcommand {\del}[1]    {{\blue \sout{#1}}}
+\newcommand {\dlt}[1]    {{\violet \sout{#1}}} %alternate delete color
+
+\newcommand {\black}     {\color{black}}
+\newcommand {\red}       {\color{red}}
+\newcommand {\blue}      {\color{blue}}
+\newcommand {\strike}[1] {{\blue \sout{#1}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+  \begin{flushright}
+    \bf {MU2E/PHYSICS/xxxxx} \\
+    version 1.0
+    \today
+ \end{flushright}
 
-\section{08/02/24}
-We are running an artdaq DEMO simulation: we have 2 board-readers that fill 2 event-builders that have in common one data-logger. There is also a dispatcher which aggregates DQM metrics and presents them to a visualizer application.
-In this simulation we are trying to fill the buffer of boardreaders with some numbers, changing frequency between events and then readout.
-(XXXX).Eighteen cables (108 links) are used for the Tracker, with four Tracker Readout Controllers sharing each pair of redundant links. The data rate will average 160 MBytes/s per link with two Tracker or three Calorimeter Readout Controllers. We have 40 DAQ nodes, each one with 2 DTCs. Each DTC will have one board-reader, so we expect the minimum input rate in each boardreader is 2kHz more or less. If boardreaders are not able to read this, there could be a bottleneck and the experiment can't do what is expected.
-\subsection{Variables/Functions needed for the analysis and changes we have done}
+  \vspace{1cm}
+
+  \begin{center}
+    {\Large \bf Commissioning of the Mu2e Data AcQuisition system and the Vertical Slice Test of the straw tracker
+
+      \vspace{0.3in}
+
+      11. An artdaq Demo tests
+    }
+
+    \vspace{1cm}
+    Pavel Murat (FNAL) \\
+    Sara Gamba (University of Pisa)
+%     S. Gamba  \footnote{\texttt{Fermilab; e-mail:s.gamba2\@studenti.unipi.it} (University of Pisa)
+%     P. Murat \footnote{\texttt{Fermilab; e-mail: murat\@fnal.gov}
+
+   
+    version 1.0
+    \today
+ \end{center}
+
+  \begin{abstract}
+    This note presents the initial results of an analysis on the artdaq rate.
+    \vspace{0.2in}
+  \end{abstract}
+
+\end{titlepage}
+% \frontmatter
+% \chapter*{Abstract}
+%
+% \addcontentsline{toc}{chapter}{Abstract}
+%
+% \mainmatter
+%
+{\tableofcontents}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\chapter{Calibration}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \input{input_data}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
+\section {Notes for the authors}
+\subsection {Revision history} 
 \begin{itemize}
-    \item  $max\_fragment\_size\_bytes$: it is the maximal dimension per fragment in the shared memory that is allocated (important that the event size is less than this value);
-    \item $AllocateReadoutBuffer(char** buffer)$: it is a function that allocates memory for the buffer (each channel of the tracker will have this buffer). Its value is $uint8\_t(sizeof(demo::ToyFragment::Header) + maxADCchannels\_ \times sizeof(data\_t)))$, where $maxADCchannels\_$ is set at 50M and the $size(data\_t)$ is 2Bytes. Approximately is 100MBytes allocated;
-    \item $nADCchannels\_$: it is used where the read bytes are defined, so $bytes\_read = sizeof(demo::ToyFragment::Header) + nADCchannels\_after\_N\_seconds\_ \times sizeof(data\_t)$, so the dimension will be this number $\times$ 2Bytes;
-    \item In the function $FillBuffer(buffer,bytes\_read)$ we start filling the first channel after the header in the buffer, with some numbers;
-    \item This function is called each $throttle\_ usecs \ \mu$s. Outputs $New FragmentPtrs$ will be added to this container and the function will return True if data-taking should continue.
+\item
+  v1.01: initial version
 \end{itemize}
-If the artdaq framework works we should see a $GetNext$ Frequency equal to the inverse of the $throttle\_ usecs \ \mu$s value.
-
-Next events are with 2 BR.
-\\
-BAD OMEN EVERYWHERE.
-\section{12/02/24}
+\newpage
+\section{Running an artdaq demo}
+We were running an artdaq demo simulation to test if the artdaq supports high event rates: we should be able to get data at a rate of more than 200MB/s. This demo is called ToySim and it is taken from $ots\_mu2e\_tracker$, adding a $Generators$ directory. This directory is very similar to $artdaq\_demo\/artdaq-demo\/Generators$ directory. We were sending some random events to two boardreaders. These events were taken by two eventbuilders that have a common data logger. A dispatcher, which aggregates DQM metrics and presents them to a visualizer application, was used. We were trying to run the demo changing some parameters:
+\begin{itemize}
+\item time between events: the function called $FillBuffer(buffer,bytes\_read)$ is called every time after $throttle\_ usecs \ \mu$s;
+\item size of the events: $nADCchannels$ is the variable we are changing and it is used to define how many bytes are readout ($bytes\_read = sizeof(demo::ToyFragment::Header)$ $+ nADCchannels \times sizeof(data\_t)$, so the dimension will be this number $\times$ 2Bytes more or less);
+\item number of eventbuilders (1 or 2);
+\item number of boardreaders (1 or 2);
+\item the presence of a dispatcher;
+\item the  transferPluginType: $Shmem$ and  $TCPSocket$.
+\end{itemize} 
+If the artdaq framework is able to process this events, we should see a $GetNext$ Frequency equal to the inverse of the $throttle\_ usecs \ \mu$s value. We have tried to change the variables $nADCchannels$ and $throttle\_usecs$.
+\section{Results}
+During the running some errors appeared, as the following:
+\begin{itemize}
+    \item Bad Omen: Data Buffer has exceeded its size limits.
+    \\
+    ($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124
+    \\
+    with this type of error the rate is not stable;
+    \item Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!
+\end{itemize}
+ We report some tables that show our results. 
 \begin{center}  
 \begin{table}[!h]
 \centering
 \begin{tabular}{c c c}
 \hline
-bytes & throttle &  result\\
+bytes & throttle\_usecs &  result\\
 \hline
 200k & 0 & BAD OMEN \& back pressure \\
 200k & 10 (100kHz) & BAD OMEN \& back pressure \\
@@ -42,7 +197,7 @@ bytes & throttle &  result\\
 200k & 10000 (100Hz) & BAD OMEN \& back pressure \\
 200k & 100000 (10Hz) & BAD OMEN \& back pressure\\
 \end{tabular}
-\caption{ results.}
+\caption{We tried to change rates and to use a fixed number of bytes (200kB). Results: we cannot operate with this event size.}
 \end{table}\label{tab:upperlimits}
 \end{center}
 \begin{center}  
@@ -50,16 +205,16 @@ bytes & throttle &  result\\
 \centering
 \begin{tabular}{c c c}
 \hline
-bytes & throttle &  result\\
+bytes & throttle\_usecs &  result\\
 \hline
 100k & 1000 (1kHz) & BAD OMEN \\
 100k & 2000 (500Hz) & BAD OMEN \\
 100k & 4000 (250Hz) & BAD OMEN \\
 100k & 5000 (200Hz) & BAD OMEN \\
-100k & 6000 (166Hz) & OKAY:rate 163Hz \\
-100k & 10000 (100Hz) & OKAY:rate 98.5Hz \\
+100k & 6000 (166Hz) & OKAY: rate 163Hz \\
+100k & 10000 (100Hz) & OKAY: rate 98.5Hz \\
 \end{tabular}
-\caption{ results. At 20MB/s more or less it gets errors.}
+\caption{We tried to change rates and to use a fixed number of bytes (100kB). Results: at 20MB/s more or less it gets errors.}
 \end{table}\label{tab:upperlimits}
 \end{center}
 \begin{center}  
@@ -67,14 +222,14 @@ bytes & throttle &  result\\
 \centering
 \begin{tabular}{c c c}
 \hline
-bytes & throttle &  result\\
+bytes & throttle\_usecs &  result\\
 \hline
 40k & 2000 (500Hz) & BAD OMEN  \\
-40k & 3000 (333Hz) & OKAY:rate 320Hz  \\
-40k & 5000 (200Hz) & OKAY:rate 195Hz  \\
-40k & 10000 (100Hz) & OKAY:rate 98.7Hz \\
+40k & 3000 (333Hz) & OKAY: rate 320Hz  \\
+40k & 5000 (200Hz) & OKAY: rate 195Hz  \\
+40k & 10000 (100Hz) & OKAY: rate 98.7Hz \\
 \end{tabular}
-\caption{ results. At 20MB/s more or less it gets errors.}
+\caption{We tried to change rates and to use a fixed number of bytes (40k). Results: at 20MB/s more or less it gets errors.}
 \end{table}\label{tab:upperlimits}
 \end{center}
 
@@ -83,28 +238,18 @@ bytes & throttle &  result\\
 \centering
 \begin{tabular}{c c c}
 \hline
-bytes & throttle &  result\\
+bytes & throttle\_usecs &  result\\
 \hline
-70k & 5000 (200Hz) & OKAY:rate 195Hz  \\
-70k & 4000 (250Hz) & OKAY:rate 242Hz and BAD OMEN after one min  \\
+70k & 5000 (200Hz) & OKAY: rate 195Hz  \\
+70k & 4000 (250Hz) & OKAY: rate 242Hz and BAD OMEN after 1 m  \\
 70k & 3000 (333Hz) & BAD OMEN  \\
 
 \end{tabular}
-\caption{ results. At 20MB/s more or less it gets errors.}
+\caption{We tried to change rates and to use a fixed number of bytes (70k). Results: at 20MB/s more or less it gets errors.}
 \end{table}\label{tab:upperlimits}
 \end{center}
 
+We have tried to change also the other variables listed before, but nothing else changed. As we can see it is not possible to run artdaq at rates higher than 20MB/s and this needs to be fixed. 
 
-Error message: 
-\begin{itemize}
-    \item Bad Omen: Data Buffer has exceeded its size limits.
-    \\
-    ($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124
-    \\
-    with this type of error the rate is not stable
-    \item Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!
-\end{itemize}
-
-The same with Shmem instead of TCPSocket.
 \end{document}
 
