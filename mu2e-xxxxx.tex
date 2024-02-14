@@ -133,7 +133,7 @@
  \end{center}
 
   \begin{abstract}
-    This note presents the initial results of an analysis on the artdaq rate.
+    This note presents the initial results of a simulation conducted with an artdaq demo.
     \vspace{0.2in}
   \end{abstract}
 
@@ -162,27 +162,20 @@
 \end{itemize}
 \newpage
 \section{Running an artdaq demo}
-We were running an artdaq demo simulation to test if the artdaq supports high event rates: we should be able to get data at a rate of more than 200MB/s. This demo is called ToySim and it is taken from $ots\_mu2e\_tracker$, adding a $Generators$ directory. This directory is very similar to $artdaq\_demo\/artdaq-demo\/Generators$ directory. We were sending some random events to two boardreaders. These events were taken by two eventbuilders that have a common data logger. A dispatcher, which aggregates DQM metrics and presents them to a visualizer application, was used. We were trying to run the demo changing some parameters:
-\begin{itemize}
-\item time between events: the function called $FillBuffer(buffer,bytes\_read)$ is called every time after $throttle\_ usecs \ \mu$s;
-\item size of the events: $nADCchannels$ is the variable we are changing and it is used to define how many bytes are readout ($bytes\_read = sizeof(demo::ToyFragment::Header)$ $+ nADCchannels \times sizeof(data\_t)$, so the dimension will be this number $\times$ 2Bytes more or less);
-\item number of eventbuilders (1 or 2);
-\item number of boardreaders (1 or 2);
-\item the presence of a dispatcher;
-\item the  transferPluginType: $Shmem$ and  $TCPSocket$.
-\end{itemize} 
-If the artdaq framework is able to process this events, we should see a $GetNext$ Frequency equal to the inverse of the $throttle\_ usecs \ \mu$s value. We have tried to change the variables $nADCchannels$ and $throttle\_usecs$.
+We are running an artdaq demo simulation to test if the artdaq supports high event rates: we should be able to read data at a rate on average 2 kHz per boardreader. The demo uses two boardreaders, both on the same computer, two eventbuilders and a common datalogger. We are sending some random events to two boardreaders. An event is composed of an header and of some fragments, each of 2 bytes. We can decide the number of fragments, changing a variable called $nADCchannels$ and as a consequence, we change the event size (header size is fixed). The boardreaders communicate with the eventbuilders through the shared memory. A dispatcher, which aggregates DQM metrics and presents them to a visualizer application, is also used. Events are generated with a frequency that is the inverse of a variable called $throttle\_ usecs$, expressed in $\mu$s. We are testing the system, changing $nADCchannels$ and $throttle\_usecs$. We are testing also changing the boardreaders or eventbuilders number and switching off the dispatcher. MIDAS slow control monitoring system provides tracking of the output file size and the input frequency of data in a boardreader.
 \section{Results}
-During the running some errors appeared, as the following:
+I would like to report in advance all type of errors seen during the runs and after that for which parameters these errors occur. The errors, reported in the log files, are the following:
 \begin{itemize}
-    \item Bad Omen: Data Buffer has exceeded its size limits.
+    \item \textit{Bad Omen: Data Buffer has exceeded its size limits}.
     \\
-    ($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124
+    \textit{($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124}
     \\
-    with this type of error the rate is not stable;
-    \item Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!
+    While this type of error occurs, the input rate in the first boardreader becomes unstable;
+    \item \textit{Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!}
+    \\
+    While this type of error occurs, no data are written on the output file.
 \end{itemize}
- We report some tables that show our results. 
+In the following, different tables are reported, showing all parameters changed during the runs. In each table number of bytes generated, generation frequency and the result of the run are shown. The result could be either the error we are getting or the first boardreader rate reported by the system. The errors generally occur as soon as the run as started. If not, I reported the time after which the error occurs.
 \begin{center}  
 \begin{table}[!h]
 \centering
@@ -197,7 +190,7 @@ bytes & throttle\_usecs &  result\\
 200k & 10000 (100Hz) & BAD OMEN \& back pressure \\
 200k & 100000 (10Hz) & BAD OMEN \& back pressure\\
 \end{tabular}
-\caption{We tried to change rates and to use a fixed number of bytes (200kB). Results: we cannot operate with this event size.}
+\caption{This table show the results of data run with events of 200kB at different generation frequency. As we can see, it is not possible to operate with this event size.}
 \end{table}\label{tab:upperlimits}
 \end{center}
 \begin{center}  
@@ -214,9 +207,27 @@ bytes & throttle\_usecs &  result\\
 100k & 6000 (166Hz) & OKAY: rate 163Hz \\
 100k & 10000 (100Hz) & OKAY: rate 98.5Hz \\
 \end{tabular}
-\caption{We tried to change rates and to use a fixed number of bytes (100kB). Results: at 20MB/s more or less it gets errors.}
+\caption{This table show the results of data run with events of 100kB at different generation frequency. At more or less 20MB/s the system gets errors. It is possible to operate only under 200 Hz per boardreader with an event size of 100kB.}
 \end{table}\label{tab:upperlimits}
 \end{center}
+
+\begin{center}  
+\begin{table}[!h]
+\centering
+\begin{tabular}{c c c}
+\hline
+bytes & throttle\_usecs &  result\\
+\hline
+70k & 3000 (333Hz) & BAD OMEN  \\
+
+70k & 4000 (250Hz) & BAD OMEN after 1 m  \\
+
+70k & 5000 (200Hz) & OKAY: rate 195Hz  \\
+\end{tabular}
+\caption{This table show the results of data run with events of 70kB at different generation frequency. At more or less 20MB/s the system gets errors. It is possible to operate only under 195 Hz per boardreader with an event size of 70kB.}
+\end{table}\label{tab:upperlimits}
+\end{center}
+
 \begin{center}  
 \begin{table}[!h]
 \centering
@@ -229,27 +240,12 @@ bytes & throttle\_usecs &  result\\
 40k & 5000 (200Hz) & OKAY: rate 195Hz  \\
 40k & 10000 (100Hz) & OKAY: rate 98.7Hz \\
 \end{tabular}
-\caption{We tried to change rates and to use a fixed number of bytes (40k). Results: at 20MB/s more or less it gets errors.}
+\caption{This table show the results of data run with events of 40kB at different generation frequency. At more or less 20MB/s the system gets errors. It is possible to operate only under 320 Hz per boardreader with an event size of 40kB.}
 \end{table}\label{tab:upperlimits}
 \end{center}
-
-\begin{center}  
-\begin{table}[!h]
-\centering
-\begin{tabular}{c c c}
-\hline
-bytes & throttle\_usecs &  result\\
-\hline
-70k & 5000 (200Hz) & OKAY: rate 195Hz  \\
-70k & 4000 (250Hz) & OKAY: rate 242Hz and BAD OMEN after 1 m  \\
-70k & 3000 (333Hz) & BAD OMEN  \\
-
-\end{tabular}
-\caption{We tried to change rates and to use a fixed number of bytes (70k). Results: at 20MB/s more or less it gets errors.}
-\end{table}\label{tab:upperlimits}
-\end{center}
-
-We have tried to change also the other variables listed before, but nothing else changed. As we can see it is not possible to run artdaq at rates higher than 20MB/s and this needs to be fixed. 
+\section{Conclusions}
+No significant change has been seen changing the number of boardreaders and eventbuilders and also without the dispatcher.
+In conclusion, we have tested that it is not possible to run artdaq at rates higher than 300Hz per boardreader and this needs to be fixed. 
 
 \end{document}
 
