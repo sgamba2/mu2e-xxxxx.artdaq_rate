@@ -114,11 +114,11 @@
   \vspace{1cm}
 
   \begin{center}
-    {\Large \bf Commissioning of the Mu2e Data AcQuisition system and the Vertical Slice Test of the straw tracker
+    {\Large \bf Commissioning of the tracker DAQ for the Vertical Slice Test
 
       \vspace{0.3in}
 
-      11. An artdaq Demo tests
+      2. Initial tests of ARTDAQ 'demo' configuration
     }
 
     \vspace{1cm}
@@ -161,21 +161,105 @@
   v1.01: initial version
 \end{itemize}
 \newpage
-\section{Running an artdaq demo}
-We are running an artdaq demo simulation to test if the artdaq supports high event rates: we should be able to read data at a rate on average 2 kHz per boardreader. The demo uses two boardreaders, both on the same computer, two eventbuilders and a common datalogger. We are sending some random events to two boardreaders. An event is composed of an header and of some fragments, each of 2 bytes. We can decide the number of fragments, changing a variable called $nADCchannels$ and as a consequence, we change the event size (header size is fixed). The boardreaders communicate with the eventbuilders through the shared memory. A dispatcher, which aggregates DQM metrics and presents them to a visualizer application, is also used. Events are generated with a frequency that is the inverse of a variable called $throttle\_ usecs$, expressed in $\mu$s. We are testing the system, changing $nADCchannels$ and $throttle\_usecs$. We are testing also changing the boardreaders or eventbuilders number and switching off the dispatcher. MIDAS slow control monitoring system provides tracking of the output file size and the input frequency of data in a boardreader.
+\section{Running an ARTDAQ demo}
+\begin{itemize}
+\item 
+\add{
+  Need to describe what is ARTDAQ and what is the ARTDAQ 'demo' configuration.
+  Perhaps, a reference to ARTDAQ ?
+  We are not running a simulation, however the ARTDAQ 'demo' configuration
+  uses simulated fragments as input 
+}
+\end{itemize}
+
+We are running an artdaq demo simulation to test if the artdaq supports high event rates: we should be able to read data at a rate on average 2 kHz per boardreader. The demo uses two boardreaders, both on the same computer, two eventbuilders and a common datalogger. We are sending some random events to two boardreaders.
+
+\begin{itemize}
+\item 
+  already too many {\bf we's}
+\item 
+  no one is sending random events to the boardreaders
+\end{itemize}
+
+An event is composed of \del{an}\add{a} header and of some fragments, each of 2 bytes.
+\add{
+\begin{itemize}
+\item
+  explain what a 2-byte fragment is? 
+\item
+  explain 'some fragments' ?
+\end{itemize}
+}
+
+We can decide the number of fragments, changing a variable called $nADCchannels$ and as a consequence, we change the event size (header size is fixed).
+
+\add{two we's in the same sentence - rephrase} 
+
+The boardreaders communicate with the eventbuilders through the shared memory.
+
+A dispatcher, which aggregates DQM metrics and presents them to a visualizer application, is also used.
+
+\add{the dispatcher doesn't aggregate the DQM metrics}
+
+Events are generated with a frequency that is the inverse of a variable called $throttle\_ usecs$,
+expressed in $\mu$s.
+
+\add{not accurate}
+
+We are testing the system, changing $nADCchannels$ and $throttle\_usecs$. We are testing also changing the boardreaders or eventbuilders number and switching off the dispatcher.
+
+\add{
+  \begin{itemize}
+  \item 
+    we's, 
+  \item
+    we are varying the event size, no one would understand throttle\_usecs
+  \end{itemize}
+}
+\add{
+  During the testing, the ARTDAQ components are managed by the MIDAS frontend,
+  and the MIDAS slow control history system provides the real time histogramming
+  and monitoring of the output file size and the event rates in the system.
+}
 \section{Results}
 I would like to report in advance all type of errors seen during the runs and after that for which parameters these errors occur. The errors, reported in the log files, are the following:
+
+\add{
+  \begin{itemize}
+  \item 
+    ``I would like to report'' - was ``we'' before ... rephrase 
+  \item
+    perhaps, move to appendix ?
+  \end{itemize}
+}
+
 \begin{itemize}
-    \item \textit{Bad Omen: Data Buffer has exceeded its size limits}.
-    \\
-    \textit{($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124}
-    \\
-    While this type of error occurs, the input rate in the first boardreader becomes unstable;
-    \item \textit{Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!}
-    \\
-    While this type of error occurs, no data are written on the output file.
+\item \textit{Bad Omen: Data Buffer has exceeded its size limits}.
+  \\
+  \textit{($seq\_id$=125, $frag\_id$=0, frags=1001/1000, szB=200248048/1048576000), timestamps=124-1124}
+  \\
+  While this type of error occurs, the input rate in the first boardreader becomes unstable;
+\item \textit{Back-pressure condition: All Shared Memory buffers have been full for 12.025 s!}
+  \\
+  While this type of error occurs, no data are written on the output file.
 \end{itemize}
+
+\add{
+  perhaps, can use human language to describe the error conditions ? - Say, present the diagnostics,
+  and explain its meaning , as we understand it now. An appendix could help\\
+}
+
 In the following, different tables are reported, showing all parameters changed during the runs. In each table number of bytes generated, generation frequency and the result of the run are shown. The result could be either the error we are getting or the first boardreader rate reported by the system. The errors generally occur as soon as the run as started. If not, I reported the time after which the error occurs.
+
+\add{
+  \begin{itemize}
+  \item 
+    ``I'' vs ``we''
+  \item
+    can use ``internal delay'' instead of ``throttle\_usec'' , for example
+  \end{itemize}
+}
+
 \begin{center}  
 \begin{table}[!h]
 \centering
@@ -190,7 +274,12 @@ bytes & throttle\_usecs &  result\\
 200k & 10000 (100Hz) & BAD OMEN \& back pressure \\
 200k & 100000 (10Hz) & BAD OMEN \& back pressure\\
 \end{tabular}
-\caption{This table show the results of data run with events of 200kB at different generation frequency. As we can see, it is not possible to operate with this event size.}
+\caption{
+  \del{This table show the} results of \add{the} data run with \add{event size of 200kBytes}
+  \del{events of 200kB} at different generation frequency.
+  As we can see, it is not possible to operate with this event size.
+  \add{need to double check if it is not a configuration error on the tester side}
+}
 \end{table}\label{tab:upperlimits}
 \end{center}
 \begin{center}  
@@ -207,7 +296,10 @@ bytes & throttle\_usecs &  result\\
 100k & 6000 (166Hz) & OKAY: rate 163Hz \\
 100k & 10000 (100Hz) & OKAY: rate 98.5Hz \\
 \end{tabular}
-\caption{This table show the results of data run with events of 100kB at different generation frequency. At more or less 20MB/s the system gets errors. It is possible to operate only under 200 Hz per boardreader with an event size of 100kB.}
+\caption{\del{This table show the} results of \add{the} data run with \del{events}\add{the event size}
+  of 100kBytes at different \del{generation frequency}\add{event input rates}.
+  At more or less 20MB/s the system gets errors.
+  It is possible to operate only under 200 Hz per boardreader with an event size of 100kB.}
 \end{table}\label{tab:upperlimits}
 \end{center}
 
@@ -224,7 +316,11 @@ bytes & throttle\_usecs &  result\\
 
 70k & 5000 (200Hz) & OKAY: rate 195Hz  \\
 \end{tabular}
-\caption{This table show the results of data run with events of 70kB at different generation frequency. At more or less 20MB/s the system gets errors. It is possible to operate only under 195 Hz per boardreader with an event size of 70kB.}
+\caption{
+  \del{This table show} the results of data run with events of 70kB at different generation frequency.
+  At more or less 20MB/s the system gets errors. It is possible to operate only
+  under 195 Hz per boardreader with an event size of 70kB.
+}
 \end{table}\label{tab:upperlimits}
 \end{center}
 
@@ -240,12 +336,23 @@ bytes & throttle\_usecs &  result\\
 40k & 5000 (200Hz) & OKAY: rate 195Hz  \\
 40k & 10000 (100Hz) & OKAY: rate 98.7Hz \\
 \end{tabular}
-\caption{This table show the results of data run with events of 40kB at different generation frequency. At more or less 20MB/s the system gets errors. It is possible to operate only under 320 Hz per boardreader with an event size of 40kB.}
+\caption{\del{This table show} the results of data run with events of 40kBytes
+  \del{at different generation frequency}\add{for different event input rates}.
+  At more or less 20MB/s the system gets errors.
+  It is possible to operate only under 320 Hz per boardreader with an event size of 40kB.
+}
 \end{table}\label{tab:upperlimits}
 \end{center}
 \section{Conclusions}
-No significant change has been seen changing the number of boardreaders and eventbuilders and also without the dispatcher.
-In conclusion, we have tested that it is not possible to run artdaq at rates higher than 300Hz per boardreader and this needs to be fixed. 
+No significant change has been seen changing the number of boardreaders
+and eventbuilders and also without the dispatcher.
+In conclusion, we have tested that it is not possible to run artdaq
+at rates higher than 300Hz per boardreader and this needs to be fixed.
+
+\add{
+  this conclusion is too extreme and not accurate. For example, I'm running at 650 Hz
+  and the failures do not seem to be ARTDAQ-related
+}
 
 \end{document}
 
